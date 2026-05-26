@@ -1,0 +1,12 @@
+.DS_Store
+.idea/
+.vscode/
+.claude/settings.local.json
+*.log
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+/tmp/
+data/topic_index.json

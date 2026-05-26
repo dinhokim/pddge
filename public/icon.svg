@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f1115"/>
+  <g transform="translate(256 256)">
+    <polygon points="0,-150 150,0 0,150 -150,0" fill="#f7c84a" stroke="#fff" stroke-width="14"/>
+    <text x="0" y="22" font-family="-apple-system, Arial, sans-serif" font-size="120" font-weight="700"
+          text-anchor="middle" fill="#0f1115">B</text>
+  </g>
+</svg>
