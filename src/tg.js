@@ -14,9 +14,9 @@ export function initTG() {
     if (v >= 8 && typeof tg.requestFullscreen === "function") {
       try { tg.requestFullscreen(); } catch {}
     }
-    // Подгоним тему TG к нашему тёмному стилю (или возьмём из TG, если светлая)
-    tg.setHeaderColor?.("#0f1115");
-    tg.setBackgroundColor?.("#0f1115");
+    // Подгоним тему TG к новому light-дизайну
+    tg.setHeaderColor?.("#FFFBF7");
+    tg.setBackgroundColor?.("#FFFBF7");
     tg.enableClosingConfirmation?.();
     // Применить цвета темы TG как CSS-переменные (на случай светлой темы у юзера)
     applyThemeFromTG();

@@ -1,4 +1,4 @@
-import { h, mount, topbar } from "../render.js";
+import { h, mount, topbar, progress } from "../render.js";
 import { sampleExam, TOPICS_BY_TCSC } from "../data.js";
 import { renderTicket } from "./ticket.js";
 import { renderResult } from "./result.js";
@@ -20,15 +20,20 @@ export function renderPractice(ctx) {
   }
   const q = session.questions[session.index];
   const topic = TOPICS_BY_TCSC[q.topic];
-  const bar = sessionBar(session);
 
   renderTicket(ctx, {
     q,
-    topicName: topic?.name,
-    revealMode: "click",
-    headerTitle: `Практика · ${session.index + 1}/${session.questions.length}`,
-    back: () => { ctx.session.practice = null; location.hash = "#/"; },
-    sessionBar: bar,
+    topic,
+    mode: "tap",
+    index: session.index,
+    total: session.questions.length,
+    headerTitle: "",
+    subtitle: `Практика · ✓ ${session.correct}`,
+    progressColor: "var(--success)",
+    back: () => {
+      ctx.session.practice = null;
+      location.hash = "#/";
+    },
     onAnswer: (correct) => {
       ctx.store.recordAnswer(q.id, correct);
       if (correct) session.correct++; else session.errors++;
@@ -37,6 +42,7 @@ export function renderPractice(ctx) {
       session.index++;
       renderPractice(ctx);
     },
+    nextLabel: session.index + 1 >= session.questions.length ? "Завершить" : "Дальше",
   });
 }
 
@@ -48,13 +54,4 @@ function newSession(ctx) {
     errors: 0,
     startedAt: Date.now(),
   };
-}
-
-function sessionBar(s) {
-  const pct = Math.round((s.index / s.questions.length) * 100);
-  return h("div", { class: "session-bar" },
-    h("div", { class: "progress" }, h("div", { style: `width:${pct}%` })),
-    h("div", { class: "counter" }, `${s.index}/${s.questions.length}`),
-    h("div", { class: "errors" }, `✓ ${s.correct} · ✗ ${s.errors}`),
-  );
 }
