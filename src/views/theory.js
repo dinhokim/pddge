@@ -2,6 +2,7 @@ import { h, mount, topbar } from "../render.js";
 import { TOPICS, TOPICS_BY_SLUG } from "../data.js";
 import { renderTicket } from "./ticket.js";
 import { hideMainButton, isTG } from "../tg.js";
+import { getDifficultSet } from "../store.js";
 
 export function renderTheoryTopics(ctx) {
   if (isTG) hideMainButton();
@@ -37,6 +38,7 @@ export function renderTheoryTopic(ctx, slug) {
   const qs = (ctx.data.byTopic[topic.tcsc] || []).slice().sort((a, b) => a.id - b.id);
 
   const progress = ctx.store.getProgress();
+  const diff = getDifficultSet();
   const node = h("div", { class: "app" },
     topbar(topic.name, { back: () => (location.hash = "#/theory") }),
     qs.length === 0
@@ -45,11 +47,15 @@ export function renderTheoryTopic(ctx, slug) {
           ...qs.map((q, i) => {
             const rec = progress.answered[q.id];
             const cls = rec ? (rec.correct ? "ok" : "fail") : "";
+            const isDiff = diff.has(q.id);
             return h("a", {
-              class: `ticket-tile ${cls}`,
+              class: `ticket-tile ${cls}${isDiff ? " hot" : ""}`,
               href: `#/theory/${slug}/${q.id}`,
-              title: `Билет №${q.id}`,
-            }, String(i + 1));
+              title: `Билет №${q.id}${isDiff ? " · сложный" : ""}`,
+            },
+              String(i + 1),
+              isDiff ? h("span", { class: "fire-mark", "aria-label": "сложный" }, "🔥") : null,
+            );
           }),
         ),
   );

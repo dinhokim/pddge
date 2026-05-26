@@ -22,10 +22,15 @@ export function h(tag, attrs = {}, ...children) {
   return el;
 }
 
-export function mount(node) {
+export function mount(node, { preserveScroll = false } = {}) {
   const app = document.getElementById("app");
+  const y = preserveScroll ? window.scrollY : 0;
   app.replaceChildren(node);
-  window.scrollTo({ top: 0, behavior: "instant" });
+  // После replaceChildren высота body перестраивается — даём ей кадр,
+  // прежде чем восстанавливать scroll. Иначе scrollTo не сработает.
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: y, behavior: "instant" });
+  });
 }
 
 // мини-markdown: **bold** + переводы строк

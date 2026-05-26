@@ -7,6 +7,8 @@ export const isTG = !!tg;
 export function initTG() {
   if (!tg) return;
   try {
+    // Маркер для CSS — даёт расширенный safe-area отступ сверху и т.п.
+    document.body.classList.add("tg-mode");
     tg.ready();
     tg.expand();
     // Полноэкранный режим — только если версия TG поддерживает (≥ 8.0)

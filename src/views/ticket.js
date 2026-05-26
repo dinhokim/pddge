@@ -1,9 +1,9 @@
 // Универсальный рендер одного билета. Используется во всех трёх режимах.
 //   revealMode: "always"  — сразу показать правильный ответ и все пояснения
 //                "click"  — открыть только после клика по варианту
-//                "after"  — открыть после клика, но без подсветки остальных пояснений
 import { h, mount, topbar, fmt } from "../render.js";
 import { isTG, setMainButton, hapticNotify, hapticImpact } from "../tg.js";
+import { isDifficult, toggleDifficult } from "../store.js";
 
 export function renderTicket(ctx, opts) {
   const {
@@ -17,16 +17,19 @@ export function renderTicket(ctx, opts) {
     sessionBar,    // optional node
     onContinue,    // callback for practice/exam "Далее"
     showWhy = true,
+    allowFire = revealMode === "always", // 🔥 доступен в режиме теории
   } = opts;
 
   let answered = revealMode === "always";
   let picked = null;
-  let outerScroll = null;
+  let firstRender = true;
 
   function render() {
     const correctIdx = q.correct;
     const e = q.enriched || null;
+    const isDiff = isDifficult(q.id);
 
+    // ── Ответы ─────────────────────────────────────────────
     const answers = h("div", { class: "answers" },
       ...q.answers.map((text, i) => {
         const isCorrect = i === correctIdx;
@@ -83,17 +86,51 @@ export function renderTicket(ctx, opts) {
         )
       : null;
 
-    const ticketBlock = h("div", { class: "ticket" },
-      h("div", { class: "ticket-meta" },
-        h("div", { class: "pill" }, topicName || "—"),
-        h("div", {}, `#${q.id}`),
-      ),
+    // ── Sticky-блок: топбар + (sessionBar) + meta + вопрос + картинка ─
+    let fireBtn = null;
+    if (allowFire) {
+      fireBtn = h("button", {
+        class: `fire-btn${isDiff ? " active" : ""}`,
+        title: isDiff ? "Снять отметку «сложный»" : "Пометить как сложный",
+        "aria-pressed": isDiff ? "true" : "false",
+        onclick: (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          // не перерисовываем весь билет — просто переключаем стиль кнопки на месте
+          const now = toggleDifficult(q.id);
+          fireBtn.classList.toggle("active", now);
+          fireBtn.title = now ? "Снять отметку «сложный»" : "Пометить как сложный";
+          fireBtn.setAttribute("aria-pressed", now ? "true" : "false");
+          hapticImpact("light");
+        },
+      }, "🔥");
+    }
+
+    const meta = h("div", { class: "ticket-meta" },
+      h("div", { class: "pill" }, topicName || "—"),
+      h("div", {}, `#${q.id}`),
+      h("div", { class: "grow" }),
+      fireBtn,
+    );
+
+    const ticketHead = h("div", { class: "ticket-head" },
+      meta,
       h("div", { class: "question" }, q.question),
       q.image ? h("img", {
         class: "ticket-image",
         src: `public/images/${q.image}`,
         alt: "Иллюстрация к билету",
       }) : null,
+    );
+
+    const stickyHead = h("div", { class: "sticky-head" },
+      topbar(headerTitle || "Билет", { back }),
+      sessionBar || null,
+      ticketHead,
+    );
+
+    // ── Низ страницы (скроллится под sticky) ────────────────
+    const body = h("div", { class: "ticket-body" },
       answers,
       why,
       noQualityNote,
@@ -101,13 +138,11 @@ export function renderTicket(ctx, opts) {
       buildNav(),
     );
 
-    const root = h("div", { class: "app" },
-      topbar(headerTitle || "Билет", { back }),
-      sessionBar || null,
-      ticketBlock,
-    );
-    mount(root);
-    // В TG используем MainButton; на вебе — обычная кнопка внутри ticket-nav
+    const root = h("div", { class: "app" }, stickyHead, body);
+    mount(root, { preserveScroll: !firstRender });
+    firstRender = false;
+
+    // MainButton в TG
     if (isTG && onContinue) {
       setMainButton({
         text: "Далее",
@@ -118,13 +153,11 @@ export function renderTicket(ctx, opts) {
     } else if (isTG) {
       setMainButton({ visible: false });
     }
-    if (outerScroll != null) window.scrollTo({ top: outerScroll, behavior: "instant" });
   }
 
   function buildNav() {
     if (onContinue) {
-      // В TG кнопку «Далее» рисует MainButton — на странице её не дублируем
-      if (isTG) return null;
+      if (isTG) return null; // в TG MainButton рисует кнопку «Далее»
       return h("div", { class: "ticket-nav" },
         h("button", {
           class: "primary",

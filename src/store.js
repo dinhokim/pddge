@@ -3,6 +3,7 @@
 // {
 //   answered: { [id]: { correct: bool, ts: number } },
 //   examHistory: [ { ts, total, correct, errors, passed, durationSec } ],
+//   difficult: [ id1, id2, ... ],   // id вопросов, помеченных 🔥
 // }
 
 const KEY = "pddge.progress.v1";
@@ -10,13 +11,14 @@ const KEY = "pddge.progress.v1";
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return { answered: {}, examHistory: [] };
+    if (!raw) return { answered: {}, examHistory: [], difficult: [] };
     const data = JSON.parse(raw);
     data.answered ||= {};
     data.examHistory ||= [];
+    data.difficult ||= [];
     return data;
   } catch {
-    return { answered: {}, examHistory: [] };
+    return { answered: {}, examHistory: [], difficult: [] };
   }
 }
 
@@ -46,8 +48,26 @@ export function recordExam(result) {
 }
 
 export function resetProgress() {
-  _state = { answered: {}, examHistory: [] };
+  _state = { answered: {}, examHistory: [], difficult: [] };
   save();
+}
+
+// ── Сложные вопросы (🔥) ──────────────────────────────────────
+export function isDifficult(id) {
+  return _state.difficult.includes(+id);
+}
+
+export function toggleDifficult(id) {
+  id = +id;
+  const i = _state.difficult.indexOf(id);
+  if (i >= 0) _state.difficult.splice(i, 1);
+  else _state.difficult.push(id);
+  save();
+  return _state.difficult.includes(id);
+}
+
+export function getDifficultSet() {
+  return new Set(_state.difficult);
 }
 
 export function stats(questions) {
