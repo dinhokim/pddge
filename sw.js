@@ -1,5 +1,5 @@
 // Service worker: офлайн-first для app shell, картинок и данных.
-const CACHE = "pddge-v14";
+const CACHE = "pddge-v15";
 const SHELL = [
   "./",
   "./index.html",
@@ -67,20 +67,35 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+// Принудительная активация нового SW по запросу из клиента
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
+// HTML — всегда network-first (чтобы новые версии HTML не залипали в кэше)
+function isHTMLRequest(req, url) {
+  if (req.mode === "navigate") return true;
+  if (url.pathname === "/" || url.pathname.endsWith("/")) return true;
+  if (url.pathname.endsWith(".html")) return true;
+  return false;
+}
+
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // network-first для questions.json (чтобы обновления подхватывались)
-  if (url.pathname.endsWith("/data/questions.json")) {
+  // network-first для HTML и questions.json (чтобы обновления подхватывались)
+  if (isHTMLRequest(req, url) || url.pathname.endsWith("/data/questions.json")) {
     e.respondWith(
       fetch(req).then((r) => {
         const copy = r.clone();
         caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
         return r;
-      }).catch(() => caches.match(req)),
+      }).catch(() => caches.match(req).then((c) => c || caches.match("./"))),
     );
     return;
   }

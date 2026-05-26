@@ -33,9 +33,41 @@ async function init() {
   window.addEventListener("hashchange", route);
   route();
 
-  if ("serviceWorker" in navigator && location.protocol !== "file:") {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
-  }
+  registerSW();
+}
+
+// ─ Service Worker с авто-апдейтом ────────────────────────────────
+// Когда выходит новая версия SW, мы немедленно её активируем и
+// перезагружаем страницу, чтобы пользователь увидел свежий контент
+// сразу — без необходимости закрывать приложение.
+function registerSW() {
+  if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+  navigator.serviceWorker.register("./sw.js").then((reg) => {
+    // Каждые 60 секунд (и сразу) — проверяем обновление
+    const checkUpdate = () => { try { reg.update(); } catch {} };
+    checkUpdate();
+    setInterval(checkUpdate, 60_000);
+
+    // Когда новый SW устанавливается — попросим его сразу активироваться
+    reg.addEventListener("updatefound", () => {
+      const sw = reg.installing;
+      if (!sw) return;
+      sw.addEventListener("statechange", () => {
+        if (sw.state === "installed" && navigator.serviceWorker.controller) {
+          // есть новая версия и есть текущий контроллер — это обновление
+          sw.postMessage({ type: "SKIP_WAITING" });
+        }
+      });
+    });
+
+    // После активации нового SW — перезагрузим страницу один раз
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (reloaded) return;
+      reloaded = true;
+      location.reload();
+    });
+  }).catch(() => {});
 }
 
 function route() {
