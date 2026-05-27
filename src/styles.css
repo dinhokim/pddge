@@ -25,10 +25,14 @@ body {
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom);
 }
-/* В Telegram WebApp над контентом висит свой header (close + bot title) —
-   добавляем небольшой запас сверху, чтобы наш интерфейс не «прилипал» к нему. */
+/* В Telegram WebApp над контентом висит свой header (close + bot title +
+   кнопка «Назад»). На iOS его высота ~44px, на Android ~56px.
+   Добавляем достаточный отступ, чтобы шапка приложения не уезжала под него.
+   --tg-top используется и в sticky-блоках, чтобы они прилипали ниже header'а. */
+:root { --tg-top: 0px; }
 body.tg-mode {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+  --tg-top: calc(env(safe-area-inset-top, 0px) + 48px);
+  padding-top: var(--tg-top);
 }
 
 a { color: var(--accent); text-decoration: none; }
@@ -82,7 +86,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 }
 
 /* Sticky-блок с шапкой, sessionBar, вопросом и картинкой —
-   закреплён при скролле, всё выше скроллится «под» него. */
+   закреплён при скролле, всё выше скроллится «под» него.
+   В TG прилипает ниже системного header'а (см. --tg-top). */
 .sticky-head {
   position: sticky;
   top: 0;
@@ -92,6 +97,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   /* мягкий fade-out снизу, чтобы скролл-контент уходил «под» шапку */
   box-shadow: 0 6px 6px -6px rgba(0, 0, 0, 0.35);
 }
+body.tg-mode .sticky-head { top: var(--tg-top); }
 .sticky-head .topbar { padding-top: 12px; padding-bottom: 8px; margin: 0; }
 .sticky-head .session-bar { margin-bottom: 8px; }
 .sticky-head .ticket-head {
