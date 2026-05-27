@@ -31,7 +31,7 @@ body {
    --tg-top используется и в sticky-блоках, чтобы они прилипали ниже header'а. */
 :root { --tg-top: 0px; }
 body.tg-mode {
-  --tg-top: calc(env(safe-area-inset-top, 0px) + 48px);
+  --tg-top: calc(env(safe-area-inset-top, 0px) + 64px);
   padding-top: var(--tg-top);
 }
 
