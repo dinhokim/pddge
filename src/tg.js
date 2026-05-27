@@ -136,3 +136,15 @@ export function getUser() {
 export function getVersion() {
   return tg?.version || null;
 }
+
+// ------ Закрытие Mini App ------
+// Возвращает пользователя в чат с ботом (внутри которого открыт Mini App).
+// Если "закрытие с подтверждением" включено через enableClosingConfirmation,
+// сначала выскочит модалка от TG.
+export function closeApp() {
+  try {
+    // отключим confirmation, чтобы не выскакивала «точно выйти?» при явном клике
+    tg?.disableClosingConfirmation?.();
+    tg?.close?.();
+  } catch (e) { console.warn("tg.close failed", e); }
+}

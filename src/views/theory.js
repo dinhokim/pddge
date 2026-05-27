@@ -2,7 +2,7 @@ import { h, mount, topbar } from "../render.js";
 import { TOPICS, TOPICS_BY_SLUG } from "../data.js";
 import { renderTicket } from "./ticket.js";
 import { hideMainButton, isTG } from "../tg.js";
-import { getDifficultSet } from "../store.js";
+import { getDifficultSet, getLearnedSet } from "../store.js";
 
 export function renderTheoryTopics(ctx) {
   if (isTG) hideMainButton();
@@ -39,6 +39,7 @@ export function renderTheoryTopic(ctx, slug) {
 
   const progress = ctx.store.getProgress();
   const diff = getDifficultSet();
+  const learn = getLearnedSet();
   const node = h("div", { class: "app" },
     topbar(topic.name, { back: () => (location.hash = "#/theory") }),
     qs.length === 0
@@ -46,14 +47,21 @@ export function renderTheoryTopic(ctx, slug) {
       : h("div", { class: "ticket-grid" },
           ...qs.map((q, i) => {
             const rec = progress.answered[q.id];
-            const cls = rec ? (rec.correct ? "ok" : "fail") : "";
             const isDiff = diff.has(q.id);
+            const isLearn = learn.has(q.id);
+            const ansCls = rec ? (rec.correct ? "ok" : "fail") : "";
+            const cls = `ticket-tile ${ansCls}${isLearn ? " learned" : ""}${isDiff ? " hot" : ""}`;
+            const titleSuffix = [
+              isLearn ? "пройден" : null,
+              isDiff ? "сложный" : null,
+            ].filter(Boolean).join(", ");
             return h("a", {
-              class: `ticket-tile ${cls}${isDiff ? " hot" : ""}`,
+              class: cls,
               href: `#/theory/${slug}/${q.id}`,
-              title: `Билет №${q.id}${isDiff ? " · сложный" : ""}`,
+              title: `Билет №${q.id}${titleSuffix ? " · " + titleSuffix : ""}`,
             },
               String(i + 1),
+              isLearn ? h("span", { class: "learn-mark", "aria-label": "пройдено" }, "✅") : null,
               isDiff ? h("span", { class: "fire-mark", "aria-label": "сложный" }, "🔥") : null,
             );
           }),

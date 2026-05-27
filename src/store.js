@@ -4,6 +4,7 @@
 //   answered: { [id]: { correct: bool, ts: number } },
 //   examHistory: [ { ts, total, correct, errors, passed, durationSec } ],
 //   difficult: [ id1, id2, ... ],   // id вопросов, помеченных 🔥
+//   learned:   [ id1, id2, ... ],   // id вопросов, помеченных как пройденные ✅
 // }
 
 const KEY = "pddge.progress.v1";
@@ -11,14 +12,15 @@ const KEY = "pddge.progress.v1";
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return { answered: {}, examHistory: [], difficult: [] };
+    if (!raw) return { answered: {}, examHistory: [], difficult: [], learned: [] };
     const data = JSON.parse(raw);
     data.answered ||= {};
     data.examHistory ||= [];
     data.difficult ||= [];
+    data.learned ||= [];
     return data;
   } catch {
-    return { answered: {}, examHistory: [], difficult: [] };
+    return { answered: {}, examHistory: [], difficult: [], learned: [] };
   }
 }
 
@@ -48,7 +50,7 @@ export function recordExam(result) {
 }
 
 export function resetProgress() {
-  _state = { answered: {}, examHistory: [], difficult: [] };
+  _state = { answered: {}, examHistory: [], difficult: [], learned: [] };
   save();
 }
 
@@ -68,6 +70,24 @@ export function toggleDifficult(id) {
 
 export function getDifficultSet() {
   return new Set(_state.difficult);
+}
+
+// ── Пройденные (✅) ───────────────────────────────────────────
+export function isLearned(id) {
+  return _state.learned.includes(+id);
+}
+
+export function toggleLearned(id) {
+  id = +id;
+  const i = _state.learned.indexOf(id);
+  if (i >= 0) _state.learned.splice(i, 1);
+  else _state.learned.push(id);
+  save();
+  return _state.learned.includes(id);
+}
+
+export function getLearnedSet() {
+  return new Set(_state.learned);
 }
 
 export function stats(questions) {
