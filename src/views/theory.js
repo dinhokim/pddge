@@ -2,30 +2,49 @@ import { h, mount, topbar } from "../render.js";
 import { TOPICS, TOPICS_BY_SLUG } from "../data.js";
 import { renderTicket } from "./ticket.js";
 import { hideMainButton, isTG } from "../tg.js";
-import { getDifficultSet, getLearnedSet } from "../store.js";
+import { getDifficultSet, getLearnedSet, getExamMistakes } from "../store.js";
 
 export function renderTheoryTopics(ctx) {
   if (isTG) hideMainButton();
+  const learn = getLearnedSet();
+  const diff = getDifficultSet();
   const node = h("div", { class: "app" },
     topbar("Темы", { back: () => (location.hash = "#/") }),
     h("div", { class: "topic-list" },
       ...TOPICS.map((t) => {
         const qs = ctx.data.byTopic[t.tcsc] || [];
         const empty = qs.length === 0;
+        const total = qs.length;
+        // считаем пройденные и сложные в рамках темы
+        let learnedInTopic = 0, difficultInTopic = 0;
+        for (const q of qs) {
+          if (learn.has(q.id)) learnedInTopic++;
+          if (diff.has(q.id)) difficultInTopic++;
+        }
+        const pct = total ? Math.round((learnedInTopic / total) * 100) : 0;
         const props = {
           class: `topic-row ${empty ? "empty" : ""}`,
           href: empty ? null : `#/theory/${t.slug}`,
         };
         return h("a", props,
           h("div", { class: "idx" }, `${t.order}.`),
-          h("div", { class: "name" }, t.name),
-          h("div", { class: "count" }, empty ? "—" : `${qs.length}`),
+          h("div", { class: "topic-body" },
+            h("div", { class: "name" }, t.name),
+            !empty ? h("div", { class: "topic-progress" },
+              h("div", { class: "topic-progress-bar" },
+                h("div", { class: "topic-progress-fill", style: `width: ${pct}%` }),
+              ),
+              h("div", { class: "topic-progress-text" },
+                `✅ ${learnedInTopic}/${total}`,
+                difficultInTopic > 0
+                  ? h("span", { class: "topic-progress-fire" }, ` · 🔥 ${difficultInTopic}`)
+                  : null,
+              ),
+            ) : null,
+          ),
+          h("div", { class: "count" }, empty ? "—" : `${pct}%`),
         );
       }),
-    ),
-    h("div", { class: "info-note" },
-      "Сейчас спарсена тема «Знаки приоритета» (демо-срез). ",
-      "Остальные темы появятся после полного прогона парсера."
     ),
   );
   mount(node);

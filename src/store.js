@@ -3,8 +3,9 @@
 // {
 //   answered: { [id]: { correct: bool, ts: number } },
 //   examHistory: [ { ts, total, correct, errors, passed, durationSec } ],
-//   difficult: [ id1, id2, ... ],   // id вопросов, помеченных 🔥
-//   learned:   [ id1, id2, ... ],   // id вопросов, помеченных как пройденные ✅
+//   difficult:    [ id, ... ],   // id вопросов, помеченных 🔥
+//   learned:      [ id, ... ],   // id вопросов, помеченных как пройденные ✅
+//   examMistakes: [ id, ... ],   // id вопросов, в которых сделана ошибка на экзамене
 // }
 
 const KEY = "pddge.progress.v1";
@@ -12,15 +13,16 @@ const KEY = "pddge.progress.v1";
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return { answered: {}, examHistory: [], difficult: [], learned: [] };
+    if (!raw) return { answered: {}, examHistory: [], difficult: [], learned: [], examMistakes: [] };
     const data = JSON.parse(raw);
     data.answered ||= {};
     data.examHistory ||= [];
     data.difficult ||= [];
     data.learned ||= [];
+    data.examMistakes ||= [];
     return data;
   } catch {
-    return { answered: {}, examHistory: [], difficult: [], learned: [] };
+    return { answered: {}, examHistory: [], difficult: [], learned: [], examMistakes: [] };
   }
 }
 
@@ -50,8 +52,31 @@ export function recordExam(result) {
 }
 
 export function resetProgress() {
-  _state = { answered: {}, examHistory: [], difficult: [], learned: [] };
+  _state = { answered: {}, examHistory: [], difficult: [], learned: [], examMistakes: [] };
   save();
+}
+
+// ── Ошибки экзамена (для режима «Работа над ошибками») ────────
+export function addExamMistake(id) {
+  id = +id;
+  if (!_state.examMistakes.includes(id)) {
+    _state.examMistakes.push(id);
+    save();
+  }
+}
+export function removeExamMistake(id) {
+  id = +id;
+  const i = _state.examMistakes.indexOf(id);
+  if (i >= 0) {
+    _state.examMistakes.splice(i, 1);
+    save();
+  }
+}
+export function getExamMistakes() {
+  return _state.examMistakes.slice();
+}
+export function getExamMistakesCount() {
+  return _state.examMistakes.length;
 }
 
 // ── Сложные вопросы (🔥) ──────────────────────────────────────

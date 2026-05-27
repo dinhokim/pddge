@@ -1,5 +1,5 @@
 import { h, mount, topbar } from "../render.js";
-import { stats, getLearnedSet, getDifficultSet } from "../store.js";
+import { stats, getLearnedSet, getDifficultSet, getExamMistakesCount } from "../store.js";
 import { hideMainButton, isTG, closeApp } from "../tg.js";
 
 export function renderHome(ctx) {
@@ -7,6 +7,7 @@ export function renderHome(ctx) {
   const s = stats(ctx.data.questions);
   const learnedCount = getLearnedSet().size;
   const difficultCount = getDifficultSet().size;
+  const mistakesCount = getExamMistakesCount();
 
   const node = h("div", { class: "app" },
     h("div", { class: "hero" },
@@ -31,6 +32,16 @@ export function renderHome(ctx) {
       modeCard("📚", "Теория", "Изучать по темам с разбором ответов", "#/theory"),
       modeCard("🧠", "Практика", "30 случайных вопросов, без лимита ошибок", "#/practice"),
       modeCard("🏁", "Экзамен", "30 вопросов, 30 минут, до 5 ошибок", "#/exam"),
+      // Карточка «Работа над ошибками» — отображается всегда; если ошибок нет, кликабельна но покажет «всё чисто»
+      modeCard(
+        "🛠",
+        `Работа над ошибками${mistakesCount ? ` · ${mistakesCount}` : ""}`,
+        mistakesCount
+          ? "Отработка билетов, в которых ошиблись на экзамене"
+          : "Появится после первой ошибки в экзамене",
+        "#/mistakes",
+        mistakesCount > 0,
+      ),
     ),
     h("div", { class: "info-note" },
       "Формат экзамена 2026: 30 вопросов · 30 минут · до 5 ошибок (изменено в мае 2026). ",
@@ -47,8 +58,8 @@ export function renderHome(ctx) {
   mount(node);
 }
 
-function modeCard(emoji, title, descr, href) {
-  return h("a", { class: "mode-card", href },
+function modeCard(emoji, title, descr, href, accent = false) {
+  return h("a", { class: `mode-card${accent ? " accent" : ""}`, href },
     h("h2", {}, `${emoji} ${title}`),
     h("p", {}, descr),
   );

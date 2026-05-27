@@ -277,7 +277,7 @@ body.tg-mode .sticky-head { top: var(--tg-top); }
 .stat .l { font-size: 12px; color: var(--text-dim); }
 
 /* Topic list */
-.topic-list { display: flex; flex-direction: column; gap: 8px; }
+.topic-list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
 .topic-row {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -290,9 +290,49 @@ body.tg-mode .sticky-head { top: var(--tg-top); }
 }
 .topic-row:hover { background: var(--surface-2); text-decoration: none; }
 .topic-row .idx { color: var(--text-dim); width: 24px; text-align: right; flex-shrink: 0; }
-.topic-row .name { flex: 1; }
-.topic-row .count { color: var(--text-dim); font-size: 13px; }
+.topic-row .topic-body { flex: 1; min-width: 0; }
+.topic-row .name { color: var(--text); font-size: 14px; line-height: 1.3; }
+.topic-row .topic-progress {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topic-row .topic-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.topic-row .topic-progress-fill {
+  height: 100%;
+  background: var(--good);
+  border-radius: 999px;
+  transition: width 240ms ease;
+}
+.topic-row .topic-progress-text {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.topic-row .topic-progress-fire { color: #ffae84; }
+.topic-row .count {
+  color: var(--text-dim);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  min-width: 38px;
+  text-align: right;
+}
 .topic-row.empty { opacity: .35; pointer-events: none; }
+
+/* «Работа над ошибками» — карточка с оранжевым акцентом */
+.mode-card.accent {
+  border-color: #e85a32;
+  background: rgba(232, 90, 50, 0.06);
+}
+.mode-card.accent:hover { background: rgba(232, 90, 50, 0.1); }
 
 /* Ticket grid */
 .ticket-grid {

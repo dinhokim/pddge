@@ -2,6 +2,7 @@ import { h, mount, topbar } from "../render.js";
 import { sampleExam, TOPICS_BY_TCSC } from "../data.js";
 import { renderTicket } from "./ticket.js";
 import { renderResult } from "./result.js";
+import { addExamMistake, removeExamMistake } from "../store.js";
 
 const SIZE = 30;
 const MAX_ERRORS = 5;       // 2026 reform: до 5 ошибок включительно
@@ -47,7 +48,14 @@ export function renderExam(ctx) {
     sessionBar: bar,
     onAnswer: (correct) => {
       ctx.store.recordAnswer(q.id, correct);
-      if (correct) session.correct++; else session.errors++;
+      if (correct) {
+        session.correct++;
+        // если этот билет ранее был ошибкой — снимаем
+        removeExamMistake(q.id);
+      } else {
+        session.errors++;
+        addExamMistake(q.id);
+      }
     },
     onContinue: () => {
       session.index++;

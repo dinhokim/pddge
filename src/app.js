@@ -5,6 +5,7 @@ import { renderHome } from "./views/home.js";
 import { renderTheoryTopics, renderTheoryTopic, renderTheoryTicket } from "./views/theory.js";
 import { renderPractice } from "./views/practice.js";
 import { renderExam } from "./views/exam.js";
+import { renderMistakes } from "./views/mistakes.js";
 import { initTG, isTG, setBackButton } from "./tg.js";
 
 const ctx = {
@@ -83,6 +84,7 @@ function route() {
   }
   if (parts[0] === "practice") return renderPractice(ctx);
   if (parts[0] === "exam") return renderExam(ctx);
+  if (parts[0] === "mistakes") return renderMistakes(ctx);
 
   location.hash = "#/";
 }
