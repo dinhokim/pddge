@@ -158,7 +158,8 @@ export function renderTicket(ctx, opts) {
         h("span", {}, "Нужно повторить"),
       );
 
-      attrRow = h("div", { class: "attr-row" }, learnBtn, fireBtn);
+      // Порядок: слева «🔥 Нужно повторить», справа «✅ Понял»
+      attrRow = h("div", { class: "attr-row" }, fireBtn, learnBtn);
     }
 
     // ── Низ страницы (скроллится под sticky-head) ───────────

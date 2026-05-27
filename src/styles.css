@@ -34,6 +34,17 @@ body.tg-mode {
   --tg-top: calc(env(safe-area-inset-top, 0px) + 64px);
   padding-top: var(--tg-top);
 }
+/* Плотная маска в зоне TG header'а — закрывает контент, который при скролле
+   физически уезжает в эту зону (за sticky-head). */
+body.tg-mode::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--tg-top);
+  background: var(--bg);
+  z-index: 50;
+  pointer-events: none;
+}
 
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
