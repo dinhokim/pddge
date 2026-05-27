@@ -156,43 +156,52 @@ body.tg-mode .sticky-head { top: var(--tg-top); }
   background: var(--surface);
 }
 
-/* Кнопки-аттрибуты (✅ «пройдено», 🔥 «сложный») */
+/* Кнопки-аттрибуты «Понял» / «Нужно повторить» — большие, внизу страницы. */
+.attr-row {
+  display: flex;
+  gap: 8px;
+  padding: 4px 16px 12px;
+}
 .attr-btn {
-  flex-shrink: 0;
-  width: 32px; height: 32px;
-  border-radius: 8px;
+  flex: 1;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface-2);
   color: var(--text-dim);
-  font-size: 16px;
-  line-height: 1;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  transition: background .12s, color .12s, border-color .12s, transform .12s;
+  gap: 8px;
+  padding: 10px 12px;
+  transition: background .12s, color .12s, border-color .12s, transform .08s;
+}
+.attr-btn .emo {
+  display: inline-flex;
+  align-items: center;
+  font-size: 18px;
+  line-height: 1;
 }
 .attr-btn:hover { background: #2a3040; }
-.attr-btn:active { transform: scale(0.95); }
-/* приглушаем цветной эмодзи в неактивном состоянии */
-.attr-btn:not(.active) { filter: grayscale(0.6) opacity(0.55); }
-.attr-btn.active { filter: none; }
-/* «Сложный» — оранжевое свечение, когда активен */
+.attr-btn:active { transform: translateY(1px); }
+/* В НЕактивном состоянии приглушаем цветной эмодзи и текст */
+.attr-btn:not(.active) .emo { filter: grayscale(0.6) opacity(0.7); }
+/* «Понял» — зелёная подсветка, когда активен */
+.learn-btn.active {
+  background: var(--good-bg);
+  border-color: var(--good);
+  color: #b6f0cf;
+}
+/* «Нужно повторить» — оранжево-красная подсветка, когда активен */
 .fire-btn.active {
   background: rgba(232, 90, 50, 0.18);
   border-color: #e85a32;
   color: #ffae84;
-  filter: drop-shadow(0 0 6px rgba(232, 90, 50, 0.35));
 }
-/* «Пройдено» — зелёная подсветка, когда активен */
-.learn-btn.active {
-  background: rgba(47, 191, 113, 0.18);
-  border-color: var(--good);
-  color: #b6f0cf;
-  filter: drop-shadow(0 0 6px rgba(47, 191, 113, 0.30));
-}
-.attr-row { display: inline-flex; gap: 6px; align-items: center; }
 
 .boot {
   text-align: center;
@@ -396,11 +405,25 @@ body.tg-mode .sticky-head { top: var(--tg-top); }
 .why-box p { margin: 0 0 6px; }
 
 .ticket-nav {
-  margin-top: 14px;
   display: flex;
   gap: 8px;
+  padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
 }
-.ticket-nav button { flex: 1; }
+.ticket-nav button {
+  flex: 1;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+/* Прибиваем навигацию к низу экрана, поверх скролла */
+.sticky-foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 9;
+  margin: 0;
+}
 
 /* Session header (practice / exam) */
 .session-bar {
