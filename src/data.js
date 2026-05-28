@@ -1,6 +1,16 @@
 // Загрузка вопросов и тем. Кэшируется в памяти на время сессии.
 
 import { EXPLANATIONS } from "./explanations/index.js";
+import { VISUAL_SIGN_IDS } from "./visual_ids.js";
+
+// Нейтральное пояснение для «знаковых визуальных» билетов (ответ = номер знака
+// на картинке). Текстовые описания «что нарисовано» для них были ненадёжны, т.к.
+// писались без анализа изображения, поэтому показываем безопасный текст.
+const VISUAL_HINT = {
+  correct: "Правильный вариант отмечен галочкой — сверьтесь с изображением выше: это и есть верный знак.",
+  wrong: {},
+  why: null,
+};
 
 const TOPICS_RU = [
   [1,  "uchastniki",      "Водитель, пассажир, пешеход, знаки"],
@@ -51,7 +61,11 @@ export async function loadData() {
   if (!res.ok) throw new Error(`questions.json: ${res.status}`);
   const raw = await res.json();
   const questions = raw.questions.map((q) => {
-    const enrich = (EXPLANATIONS[q.id]) || null;
+    // Для «знаковых визуальных» билетов используем нейтральное пояснение
+    // вместо потенциально неверного «что нарисовано».
+    const enrich = VISUAL_SIGN_IDS.has(q.id)
+      ? VISUAL_HINT
+      : (EXPLANATIONS[q.id] || null);
     return {
       id: q.id,
       topic: q.topic, // tcsc
