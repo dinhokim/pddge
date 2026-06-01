@@ -1,5 +1,5 @@
 // Service worker: офлайн-first для app shell, картинок и данных.
-const CACHE = "pddge-v24";
+const CACHE = "pddge-v25";
 const SHELL = [
   "./",
   "./index.html",
@@ -18,6 +18,10 @@ const SHELL = [
   "./src/views/exam.js",
   "./src/views/result.js",
   "./src/views/mistakes.js",
+  "./src/views/cards.js",
+  "./src/cards/index.js",
+  "./src/cards/visuals.js",
+  "./src/cards/prioritet.js",
   "./src/explanations/index.js",
   "./src/explanations/prioritet.js",
   "./src/explanations/uchastniki.js",

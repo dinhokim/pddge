@@ -6,6 +6,7 @@ import { renderTheoryTopics, renderTheoryTopic, renderTheoryTicket } from "./vie
 import { renderPractice } from "./views/practice.js";
 import { renderExam } from "./views/exam.js";
 import { renderMistakes } from "./views/mistakes.js";
+import { renderCards } from "./views/cards.js";
 import { initTG, isTG, setBackButton } from "./tg.js";
 
 const ctx = {
@@ -80,6 +81,7 @@ function route() {
   if (parts[0] === "theory") {
     if (parts.length === 1) return renderTheoryTopics(ctx);
     if (parts.length === 2) return renderTheoryTopic(ctx, parts[1]);
+    if (parts.length === 3 && parts[2] === "cards") return renderCards(ctx, parts[1]);
     if (parts.length === 3) return renderTheoryTicket(ctx, parts[1], parts[2]);
   }
   if (parts[0] === "practice") return renderPractice(ctx);

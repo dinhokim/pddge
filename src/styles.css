@@ -334,6 +334,192 @@ body.tg-mode .sticky-head { top: var(--tg-top); }
 }
 .mode-card.accent:hover { background: rgba(232, 90, 50, 0.1); }
 
+/* ── CTA «Учить карточки темы» ────────────────────────────── */
+.cards-cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 16px 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.18), rgba(79, 140, 255, 0.06));
+  border: 1px solid rgba(79, 140, 255, 0.45);
+  border-radius: var(--radius-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: transform .08s, background .15s;
+}
+.cards-cta:hover {
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.25), rgba(79, 140, 255, 0.08));
+  text-decoration: none;
+}
+.cards-cta:active { transform: translateY(1px); }
+.cards-cta-emoji { font-size: 28px; line-height: 1; flex-shrink: 0; }
+.cards-cta-body { flex: 1; min-width: 0; }
+.cards-cta-title { font-weight: 700; font-size: 15px; color: var(--text); }
+.cards-cta-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.cards-cta-arrow {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ── Stories: карточки темы ──────────────────────────────── */
+.cards-app {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #0f1115 0%, #1a1d28 100%);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;  /* выше маски body.tg-mode::before (z=50) */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color: var(--text);
+}
+body.tg-mode .cards-app {
+  padding-top: var(--tg-top);
+}
+
+.cards-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 4px;
+}
+.cards-close {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cards-close:hover { background: rgba(255, 255, 255, 0.2); }
+.cards-counter {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+}
+.cards-topic {
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cards-progress {
+  display: flex;
+  gap: 4px;
+  padding: 4px 14px 8px;
+}
+.cards-progress-seg {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cards-progress-seg .fill {
+  height: 100%;
+  width: 0;
+  background: var(--text);
+  border-radius: 2px;
+  transition: width 250ms ease;
+}
+.cards-progress-seg.done .fill { width: 100%; }
+.cards-progress-seg.active .fill { width: 100%; background: var(--accent); }
+
+.cards-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 22px 16px;
+  overflow-y: auto;
+}
+.cards-visual {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  min-height: 180px;
+}
+.cards-visual svg {
+  max-width: 240px;
+  max-height: 240px;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.45));
+}
+.cards-body { display: flex; flex-direction: column; gap: 10px; }
+.cards-subtitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.cards-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--text);
+}
+.cards-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.cards-text strong { color: #fff; }
+.cards-tip {
+  background: rgba(255, 200, 0, 0.08);
+  border-left: 3px solid #ffc800;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #f4e3a8;
+}
+.cards-tip strong { color: #fff; }
+
+.cards-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 0 14px 10px;
+  opacity: 0.7;
+}
+
+/* Прозрачные тап-зоны поверх контента */
+.cards-tap {
+  position: absolute;
+  top: 0; bottom: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1; /* ниже close-кнопки */
+}
+.cards-tap.left { left: 0; width: 33%; }
+.cards-tap.right { left: 33%; right: 0; }
+
+/* close + counter + visible UI должны быть кликабельны */
+.cards-app > .cards-topbar,
+.cards-app > .cards-progress,
+.cards-app > .cards-content {
+  position: relative;
+  z-index: 2;
+}
+
 /* Ticket grid */
 .ticket-grid {
   display: grid;

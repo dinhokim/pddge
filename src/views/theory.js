@@ -3,6 +3,7 @@ import { TOPICS, TOPICS_BY_SLUG } from "../data.js";
 import { renderTicket } from "./ticket.js";
 import { hideMainButton, isTG } from "../tg.js";
 import { getDifficultSet, getLearnedSet, getExamMistakes } from "../store.js";
+import { hasCards } from "../cards/index.js";
 
 export function renderTheoryTopics(ctx) {
   if (isTG) hideMainButton();
@@ -59,8 +60,22 @@ export function renderTheoryTopic(ctx, slug) {
   const progress = ctx.store.getProgress();
   const diff = getDifficultSet();
   const learn = getLearnedSet();
+  const showCardsCta = hasCards(slug);
   const node = h("div", { class: "app" },
     topbar(topic.name, { back: () => (location.hash = "#/theory") }),
+    showCardsCta
+      ? h("a", {
+          class: "cards-cta",
+          href: `#/theory/${slug}/cards`,
+        },
+          h("div", { class: "cards-cta-emoji" }, "📖"),
+          h("div", { class: "cards-cta-body" },
+            h("div", { class: "cards-cta-title" }, "Учить карточки темы"),
+            h("div", { class: "cards-cta-sub" }, "Знаки и лайфхаки в формате Stories"),
+          ),
+          h("div", { class: "cards-cta-arrow" }, "→"),
+        )
+      : null,
     qs.length === 0
       ? h("div", { class: "info-note" }, "Билеты этой темы пока не загружены.")
       : h("div", { class: "ticket-grid" },
