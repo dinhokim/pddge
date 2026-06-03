@@ -82,7 +82,8 @@ function route() {
     if (parts.length === 1) return renderTheoryTopics(ctx);
     if (parts.length === 2) return renderTheoryTopic(ctx, parts[1]);
     if (parts.length === 3 && parts[2] === "cards") return renderCards(ctx, parts[1]);
-    if (parts.length === 3) return renderTheoryTicket(ctx, parts[1], parts[2]);
+    if (parts.length === 3) return renderTheoryTicket(ctx, parts[1], parts[2], "reveal");
+    if (parts.length === 4 && parts[3] === "solve") return renderTheoryTicket(ctx, parts[1], parts[2], "solve");
   }
   if (parts[0] === "practice") return renderPractice(ctx);
   if (parts[0] === "exam") return renderExam(ctx);

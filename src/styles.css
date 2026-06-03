@@ -334,6 +334,42 @@ body.tg-mode .sticky-head { top: var(--tg-top); }
 }
 .mode-card.accent:hover { background: rgba(232, 90, 50, 0.1); }
 
+/* Toggle режима теории — две кнопки в ряд */
+.theory-mode-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 4px 16px 12px;
+}
+.theory-mode-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  color: var(--text-dim);
+  transition: background .12s, border-color .12s, color .12s;
+  font-family: inherit;
+}
+.theory-mode-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.theory-mode-btn .emo { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.theory-mode-btn .txt { flex: 1; min-width: 0; }
+.theory-mode-btn .ttl { font-weight: 600; font-size: 14px; }
+.theory-mode-btn .sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.theory-mode-btn.active {
+  background: rgba(79, 140, 255, 0.12);
+  border-color: var(--accent);
+  color: var(--text);
+}
+.theory-mode-btn.active .ttl { color: var(--accent); }
+
 /* ── CTA «Учить карточки темы» ────────────────────────────── */
 .cards-cta {
   display: flex;

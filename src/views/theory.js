@@ -61,6 +61,38 @@ export function renderTheoryTopic(ctx, slug) {
   const diff = getDifficultSet();
   const learn = getLearnedSet();
   const showCardsCta = hasCards(slug);
+
+  // ── режим темы: "reveal" (сразу видеть ответ) или "solve" (решать самому) ──
+  // Хранится в session, общий для всех тем. По умолчанию "reveal".
+  ctx.session.theoryMode ||= "reveal";
+  const mode = ctx.session.theoryMode;
+  const ticketHref = (qid) => mode === "solve"
+    ? `#/theory/${slug}/${qid}/solve`
+    : `#/theory/${slug}/${qid}`;
+
+  const modeRow = h("div", { class: "theory-mode-row" },
+    h("button", {
+      class: `theory-mode-btn ${mode === "reveal" ? "active" : ""}`,
+      onclick: () => { ctx.session.theoryMode = "reveal"; renderTheoryTopic(ctx, slug); },
+    },
+      h("span", { class: "emo" }, "📖"),
+      h("div", { class: "txt" },
+        h("div", { class: "ttl" }, "С ответами"),
+        h("div", { class: "sub" }, "Сразу видишь правильный"),
+      ),
+    ),
+    h("button", {
+      class: `theory-mode-btn ${mode === "solve" ? "active" : ""}`,
+      onclick: () => { ctx.session.theoryMode = "solve"; renderTheoryTopic(ctx, slug); },
+    },
+      h("span", { class: "emo" }, "🎯"),
+      h("div", { class: "txt" },
+        h("div", { class: "ttl" }, "Решать"),
+        h("div", { class: "sub" }, "Выбираешь — проверяешь"),
+      ),
+    ),
+  );
+
   const node = h("div", { class: "app" },
     topbar(topic.name, { back: () => (location.hash = "#/theory") }),
     showCardsCta
@@ -76,6 +108,7 @@ export function renderTheoryTopic(ctx, slug) {
           h("div", { class: "cards-cta-arrow" }, "→"),
         )
       : null,
+    qs.length > 0 ? modeRow : null,
     qs.length === 0
       ? h("div", { class: "info-note" }, "Билеты этой темы пока не загружены.")
       : h("div", { class: "ticket-grid" },
@@ -91,7 +124,7 @@ export function renderTheoryTopic(ctx, slug) {
             ].filter(Boolean).join(", ");
             return h("a", {
               class: cls,
-              href: `#/theory/${slug}/${q.id}`,
+              href: ticketHref(q.id),
               title: `Билет №${q.id}${titleSuffix ? " · " + titleSuffix : ""}`,
             },
               String(i + 1),
@@ -104,26 +137,35 @@ export function renderTheoryTopic(ctx, slug) {
   mount(node);
 }
 
-export function renderTheoryTicket(ctx, slug, id) {
+export function renderTheoryTicket(ctx, slug, id, mode = "reveal") {
   const topic = TOPICS_BY_SLUG[slug];
   if (!topic) { location.hash = "#/theory"; return; }
   const qs = (ctx.data.byTopic[topic.tcsc] || []).slice().sort((a, b) => a.id - b.id);
   const idx = qs.findIndex(q => q.id === +id);
   if (idx < 0) { location.hash = `#/theory/${slug}`; return; }
   const q = qs[idx];
-  const prev = qs[idx - 1] ? `#/theory/${slug}/${qs[idx - 1].id}` : null;
-  const next = qs[idx + 1] ? `#/theory/${slug}/${qs[idx + 1].id}` : null;
+
+  // запомним выбранный режим в session, чтобы плитка темы открывалась с тем же
+  ctx.session.theoryMode = mode;
+
+  const suffix = mode === "solve" ? "/solve" : "";
+  const prev = qs[idx - 1] ? `#/theory/${slug}/${qs[idx - 1].id}${suffix}` : null;
+  const next = qs[idx + 1] ? `#/theory/${slug}/${qs[idx + 1].id}${suffix}` : null;
+  const isSolve = mode === "solve";
 
   renderTicket(ctx, {
     q,
     topicName: topic.name,
-    revealMode: "always",
+    revealMode: isSolve ? "click" : "always",
     headerTitle: `Билет №${q.id} · ${idx + 1}/${qs.length}`,
     back: () => (location.hash = `#/theory/${slug}`),
     onAnswer: (correct) => ctx.store.recordAnswer(q.id, correct),
-    nav: {
+    // В режиме «решать» — после ответа есть кнопка «Дальше» (как в практике)
+    onContinue: isSolve && next ? () => (location.hash = next) : null,
+    // В режиме «с ответами» — обычная prev/next навигация
+    nav: !isSolve ? {
       prev: prev ? () => (location.hash = prev) : null,
       next: next ? () => (location.hash = next) : null,
-    },
+    } : null,
   });
 }
